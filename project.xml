@@ -9,6 +9,11 @@
   <inceptionYear>2000</inceptionYear>
   <shortDescription>Beanshell</shortDescription>
   <versions>
+    <version>
+      <id>1.0</id>
+      <name>1.0</name>
+      <tag>BEANSHELL_1_0</tag>
+    </version>
   </versions>
   <branches/>
   <developers>
@@ -54,7 +59,7 @@
       <artifactId>com.idega.core</artifactId>
       <version>1.9</version>
       <!--<version>SNAPSHOT</version>-->
-      
+
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
