@@ -53,6 +53,9 @@
       <version>2.0b1</version>
       <type>jar</type>
       <url>http://www.beanshell.org/</url>
+	  <properties>
+	 <idegaweb.bundle.include>true</idegaweb.bundle.include>
+	 </properties>
     </dependency>
     <dependency>
       <groupId>bundles</groupId>
