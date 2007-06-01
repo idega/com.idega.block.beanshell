@@ -11,13 +11,15 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.faces.component.UIComponent;
+
 import bsh.EvalError;
 import bsh.TargetError;
 
 import com.idega.block.beanshell.business.BSHEngine;
+import com.idega.block.web2.business.Web2Business;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
-import com.idega.core.file.data.ICFile;
 import com.idega.idegaweb.IWBundle;
 import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
@@ -45,7 +47,7 @@ import com.idega.presentation.ui.TextArea;
  * 
  * See <a href="http://www.beanshell.org">www.beanshell.org</a> for a tutorial in the Beanshell scripting language and some examples.<br>
  * @author <a href="mailto:eiki@idega.is">Eirikur Hrafnsson</a>
- * @version 0.7
+ * @version 0.8
  */
 public class BeanShellScript extends Block {
 
@@ -54,7 +56,7 @@ public class BeanShellScript extends Block {
 	private boolean showEditor = false;
 	private String scriptString;
 	private static final String PARAM_SCRIPT_STRING = "bsh_scr_str";
-	private ICFile icFileScript;
+	private String scriptURL;
 	private IWBundle bundle;
 	private String scriptInBundleFileName;
 	private String fileNameWithPath;
@@ -69,7 +71,7 @@ public class BeanShellScript extends Block {
 	public void main(IWContext iwc) throws RemoteException{
 		//TODO Eiki make safe to execute from parameter
 		//TODO Eiki allow multiple scripts per page and support ordering scripts
-		//TODO Eiki Put editor in a window and support syntax coloring
+		//TODO Eiki Put editor in a window
 		BSHEngine engine;
 		try {
 			engine = (BSHEngine) IBOLookup.getServiceInstance(iwc,BSHEngine.class);
@@ -84,12 +86,7 @@ public class BeanShellScript extends Block {
 			else{
 				Object obj = runScript(iwc,engine);
 				if(obj!=null){
-					if(obj instanceof PresentationObject){
-						add((PresentationObject)obj);
-					}
-					else{
-						System.out.println("[IW BeanShellScript result (obj.toString()): +"+obj.toString());
-					}
+					addResultObject(null, obj);
 				}
 			}
 		
@@ -108,21 +105,21 @@ public class BeanShellScript extends Block {
 				//run script from scriptstring
 				obj = engine.runScript(scriptString,iwc);
 			}
-			else if(scriptInBundleFileName!=null){
+			else if(getScriptInBundleFileName()!=null){
 				//run from a file within a bundle
 				if(bundle==null){
 					bundle = this.getBundle(iwc);
 				}
 				
-				obj = engine.runScriptFromBundle(bundle,scriptInBundleFileName,iwc);
+				obj = engine.runScriptFromBundle(bundle,scriptInBundleFileName);
 			}
-			else if(icFileScript!=null){
+			else if(getScriptURL()!=null){
 				//run from a script file in the db
-				obj = engine.runScriptFromICFile(icFileScript,iwc);
+				obj = engine.runScriptFromURL(getScriptURL());
 			}
-			else if(fileNameWithPath!=null){
+			else if(getFileNameWithPath()!=null){
 				//run from a script file from anywhere on the server
-				obj = engine.runScriptFromFileWithPath(fileNameWithPath);
+				obj = engine.runScriptFromFileWithPath(getFileNameWithPath());
 			}
 		}
 		catch (TargetError e) {
@@ -151,6 +148,13 @@ public class BeanShellScript extends Block {
 
 
 	private void addEditorAndRunScript(IWContext iwc, BSHEngine engine) throws RemoteException {
+		try {
+			Web2Business web2 = (Web2Business) IBOLookup.getServiceInstance(iwc, Web2Business.class);
+			this.getParentPage().addJavascriptURL(web2.getCodePressScriptFilePath());
+		} catch (IBOLookupException e1) {
+			e1.printStackTrace();
+		}
+		
 		Form editorForm = new Form();
 		
 		if(parametersToMaintain!=null && !parametersToMaintain.isEmpty()){
@@ -160,6 +164,9 @@ public class BeanShellScript extends Block {
 		Table table = new Table(1,3);
 		
 		TextArea scriptArea = new TextArea(PARAM_SCRIPT_STRING,( (scriptString!=null)? scriptString : ""));
+		scriptArea.setStyleClass("codepress java linenumbers-on");
+		
+		
 		scriptArea.setWidth("640");
 		scriptArea.setHeight("480");
 		
@@ -167,17 +174,38 @@ public class BeanShellScript extends Block {
 		table.add(new SubmitButton(),1,3);
 		
 		Object obj = runScript(iwc,engine);
-		if(obj!=null){
-			if(obj instanceof PresentationObject){
-				table.add((PresentationObject)obj,1,1);
-			}
-			else{
-				System.out.println("[IW BeanShellScript result (obj.toString()): +"+obj.toString());
-			}
-		}
+		addResultObject(table, obj);
 		
 		editorForm.add(table);
 		add(editorForm);
+	}
+
+
+	private void addResultObject(Table table, Object obj) {
+		if(obj!=null){
+			if(table!=null){
+				if(obj instanceof PresentationObject){
+					table.add((PresentationObject)obj,1,1);
+				}
+				else if(obj instanceof UIComponent){
+					table.add((UIComponent)obj,1,1);
+				}
+				else{
+					table.add((String)obj.toString(),1,1);
+				}
+			}
+			else{
+				if(obj instanceof PresentationObject){
+					add((PresentationObject)obj);
+				}
+				else if(obj instanceof UIComponent){
+					add((UIComponent)obj);
+				}
+				else{
+					add((String)obj.toString());
+				}
+			}
+		}
 	}
 
 
@@ -201,8 +229,8 @@ public class BeanShellScript extends Block {
 		return scriptString;
 	}
 	
-	public void setScriptFromICFile(ICFile script){
-		this.icFileScript = script;
+	public void setScriptURL(String scriptURL){
+		this.scriptURL = scriptURL;
 	}
 	
 	public void setScriptFileNameWithPath(String fileNameWithPath){
@@ -229,8 +257,51 @@ public class BeanShellScript extends Block {
 		}
 		parametersToMaintain.add(parameter);
 	}
-	
-	
+
+
+	public IWBundle getBundle() {
+		return bundle;
+	}
+
+
+	public void setBundle(IWBundle bundle) {
+		this.bundle = bundle;
+	}
+
+
+	public String getFileNameWithPath() {
+		return fileNameWithPath;
+	}
+
+
+	public void setFileNameWithPath(String fileNameWithPath) {
+		this.fileNameWithPath = fileNameWithPath;
+	}
+
+
+	public List getParametersToMaintain() {
+		return parametersToMaintain;
+	}
+
+
+	public void setParametersToMaintain(List parametersToMaintain) {
+		this.parametersToMaintain = parametersToMaintain;
+	}
+
+
+	public String getScriptInBundleFileName() {
+		return scriptInBundleFileName;
+	}
+
+
+	public void setScriptInBundleFileName(String scriptInBundleFileName) {
+		this.scriptInBundleFileName = scriptInBundleFileName;
+	}
+
+
+	public String getScriptURL() {
+		return scriptURL;
+	}
 
 
 }

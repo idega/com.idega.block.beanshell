@@ -10,12 +10,11 @@ import bsh.Interpreter;
 import bsh.TargetError;
 import bsh.servlet.BshServlet;
 
-import com.idega.block.media.business.MediaBusiness;
 import com.idega.business.IBOServiceBean;
-import com.idega.core.file.data.ICFile;
 import com.idega.idegaweb.IWBundle;
+import com.idega.idegaweb.UnavailableIWContext;
 import com.idega.presentation.IWContext;
-import com.idega.util.caching.Cache;
+import com.idega.util.FileUtil;
 
 /**
  * 
@@ -25,6 +24,10 @@ import com.idega.util.caching.Cache;
  */
 public class BSHEngineBean extends IBOServiceBean implements BSHEngine{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3639337915216094258L;
 	private String bshVersion;
 
 	public BSHEngineBean() {
@@ -136,27 +139,32 @@ public class BSHEngineBean extends IBOServiceBean implements BSHEngine{
 
 		return obj;
 	}
-	
+		
 	/**
 	 * A method that gets an Interpreter and runs the supplied bsh script WITH all request parameters initialized as String variables
 	 * 
-	 * @param ICFile The bsh script file in the database to run
-	 * @param iwc
+	 * @param URI The bsh script file to run
 	 * @return the object result, might be null
 	 */
-	public Object runScriptFromICFile(ICFile file, IWContext iwc) throws FileNotFoundException, EvalError {
+	public Object runScriptFromURL(String URL) throws EvalError {
 		Object obj = null;
-
-		Interpreter engine = getInterpreterWithRequestParametersAndContextSet(iwc);
+		IWContext iwc = null;
+		Interpreter engine = null;
+		
+		try {
+			iwc = IWContext.getInstance();
+			engine = getInterpreterWithRequestParametersAndContextSet(iwc);
+		} catch (UnavailableIWContext e) {
+			engine = getBSHInterpreter();
+		}
+		
 		//run the script
 		printBSHVersionNumber(engine);
 		
-		Cache fileInfo =  MediaBusiness.getCachedFileInfo( ((Integer)file.getPrimaryKey()).intValue(),iwc.getIWMainApplication());
-		obj = engine.eval(new FileReader(fileInfo.getRealPathToFile()));
+		obj = engine.eval(FileUtil.getStringFromURL(URL));
 
 		return obj;
 	}
-	
 
 	private Interpreter getInterpreterWithRequestParametersAndContextSet(IWContext iwc) throws EvalError {
 		Enumeration enumer = iwc.getParameterNames();

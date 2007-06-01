@@ -5,11 +5,9 @@
   </classpathentry>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
   </classpathentry>
-  <classpathentry kind="var" path="MAVEN_REPO/bsh/jars/bsh-2.0b1.jar">
+  <classpathentry kind="var" path="MAVEN_REPO/bsh/jars/bsh-2.0b4.jar">
   </classpathentry>
   <classpathentry kind="src" path="/com.idega.core">
-  </classpathentry>
-  <classpathentry kind="src" path="/com.idega.block.media">
   </classpathentry>
   <classpathentry kind="var" path="MAVEN_REPO/jdom/jars/jdom-1.0.jar">
   </classpathentry>
@@ -37,7 +35,7 @@
   </classpathentry>
   <classpathentry kind="var" path="MAVEN_REPO/jta/jars/jta-spec1_0_1.jar">
   </classpathentry>
-  <classpathentry kind="src" path="/com.idega.block.web2.0">
+  <classpathentry kind="var" path="MAVEN_REPO/bundles/jars/com.idega.block.web2.0-3.1.6.jar">
   </classpathentry>
   <classpathentry kind="output" path="target/classes">
   </classpathentry>
