@@ -11,7 +11,7 @@
   <groupId>com.idega.block.addon</groupId>
   <name>idegaWeb Beanshell Block</name>
   <artifactId>com.idega.block.beanshell</artifactId>
-  <version>4.0.0</version>
+  <version>4.0.1-SNAPSHOT</version>
   <inceptionYear>2000</inceptionYear>
   <description>idegaWeb Beanshell Block</description>
   <scm>
@@ -21,7 +21,6 @@
      -->
     <connection>scm:cvs:ext:civilis@code.idega.com:/idega/cvs:com.idega.block.addon/com.idega.block.beanshell/</connection>
     <developerConnection>scm:cvs:ext:civilis@code.idega.com:/idega/cvs:com.idega.block.addon/com.idega.block.beanshell/</developerConnection>
-    <tag>com_idega_block_addon_super-4_0_0</tag>
   </scm>
   <developers>
     <developer>
