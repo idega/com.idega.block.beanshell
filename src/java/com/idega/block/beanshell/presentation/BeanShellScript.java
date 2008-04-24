@@ -69,6 +69,7 @@ public class BeanShellScript extends Block {
 	}
 	
 	
+	@Override
 	public void main(IWContext iwc) throws RemoteException{
 		//TODO Eiki make safe to execute from parameter
 		//TODO Eiki allow multiple scripts per page and support ordering scripts
@@ -148,6 +149,7 @@ public class BeanShellScript extends Block {
 	}
 
 
+	@SuppressWarnings("cast")
 	private void addEditorAndRunScript(IWContext iwc, BSHEngine engine) throws RemoteException {
 		
 		Web2Business web2 = (Web2Business) SpringBeanLookup.getInstance().getSpringBean(iwc, Web2Business.class);
@@ -189,7 +191,7 @@ public class BeanShellScript extends Block {
 					table.add((UIComponent)obj,1,1);
 				}
 				else{
-					table.add((String)obj.toString(),1,1);
+					table.add(obj.toString(),1,1);
 				}
 			}
 			else{
@@ -200,13 +202,14 @@ public class BeanShellScript extends Block {
 					add((UIComponent)obj);
 				}
 				else{
-					add((String)obj.toString());
+					add(obj.toString());
 				}
 			}
 		}
 	}
 
 
+	@Override
 	public String getBundleIdentifier(){
 		return IW_BUNDLE_IDENTIFIER;
 	}
