@@ -62,6 +62,16 @@
       <artifactId>com.idega.block.web2.0</artifactId>
       <type>jar</type>
     </dependency>
+     <dependency>
+      <groupId>com.idega.block.platform</groupId>
+      <artifactId>com.idega.dwr</artifactId>
+      <type>jar</type>
+    </dependency>
+     <dependency>
+      <groupId>com.idega.block.platform</groupId>
+      <artifactId>com.idega.slide</artifactId>
+      <type>jar</type>
+    </dependency>
     <dependency>
       <groupId>bsh</groupId>
       <artifactId>bsh</artifactId>
