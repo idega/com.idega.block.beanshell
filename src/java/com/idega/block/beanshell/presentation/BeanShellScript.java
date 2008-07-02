@@ -20,7 +20,6 @@ import com.idega.block.beanshell.business.BSHEngine;
 import com.idega.block.web2.business.Web2Business;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
-import com.idega.business.SpringBeanLookup;
 import com.idega.idegaweb.IWBundle;
 import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
@@ -30,6 +29,7 @@ import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.TextArea;
+import com.idega.util.expression.ELUtil;
 
 /**
  * WORK IN PROGRESS, see todo list in eclipse
@@ -152,7 +152,7 @@ public class BeanShellScript extends Block {
 	@SuppressWarnings("cast")
 	private void addEditorAndRunScript(IWContext iwc, BSHEngine engine) throws RemoteException {
 		
-		Web2Business web2 = (Web2Business) SpringBeanLookup.getInstance().getSpringBean(iwc, Web2Business.class);
+		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
 		this.getParentPage().addJavascriptURL(web2.getCodePressScriptFilePath());
 		
 		Form editorForm = new Form();
