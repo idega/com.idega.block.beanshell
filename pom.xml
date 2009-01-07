@@ -73,9 +73,8 @@
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>bsh</groupId>
+      <groupId>org.beanshell</groupId>
       <artifactId>bsh</artifactId>
-      <version>${bsh-bsh-version}</version>
     </dependency>
   </dependencies>
 </project>
