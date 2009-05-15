@@ -76,7 +76,7 @@ public class BeanShellScript extends Block {
 		//TODO Eiki Put editor in a window
 		BSHEngine engine;
 		try {
-			engine = (BSHEngine) IBOLookup.getServiceInstance(iwc,BSHEngine.class);
+			engine = IBOLookup.getServiceInstance(iwc,BSHEngine.class);
 		
 			if(scriptString==null && iwc.isSuperAdmin()){
 				scriptString = iwc.getParameter(PARAM_SCRIPT_STRING);
