@@ -29,7 +29,6 @@ import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.TextArea;
-import com.idega.util.expression.ELUtil;
 
 /**
  * WORK IN PROGRESS, see todo list in eclipse
@@ -69,14 +68,13 @@ public class BeanShellScript extends Block {
 	}
 	
 	
-	@Override
 	public void main(IWContext iwc) throws RemoteException{
 		//TODO Eiki make safe to execute from parameter
 		//TODO Eiki allow multiple scripts per page and support ordering scripts
 		//TODO Eiki Put editor in a window
 		BSHEngine engine;
 		try {
-			engine = IBOLookup.getServiceInstance(iwc,BSHEngine.class);
+			engine = (BSHEngine) IBOLookup.getServiceInstance(iwc,BSHEngine.class);
 		
 			if(scriptString==null && iwc.isSuperAdmin()){
 				scriptString = iwc.getParameter(PARAM_SCRIPT_STRING);
@@ -149,10 +147,9 @@ public class BeanShellScript extends Block {
 	}
 
 
-	@SuppressWarnings("cast")
 	private void addEditorAndRunScript(IWContext iwc, BSHEngine engine) throws RemoteException {
 		
-		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
+		Web2Business web2 = (Web2Business) IBOLookup.getServiceInstance(iwc,Web2Business.class);
 		this.getParentPage().addJavascriptURL(web2.getCodePressScriptFilePath());
 		
 		Form editorForm = new Form();
@@ -209,7 +206,6 @@ public class BeanShellScript extends Block {
 	}
 
 
-	@Override
 	public String getBundleIdentifier(){
 		return IW_BUNDLE_IDENTIFIER;
 	}
