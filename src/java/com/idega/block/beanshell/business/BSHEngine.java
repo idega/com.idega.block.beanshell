@@ -12,4 +12,5 @@ public interface BSHEngine extends com.idega.business.IBOService
  public java.lang.Object runScriptFromFileWithPath(java.lang.String path)throws java.io.FileNotFoundException,bsh.EvalError, java.rmi.RemoteException;
  public java.lang.Object runScriptFromFileWithPath(java.lang.String path,com.idega.presentation.IWContext p1)throws java.io.FileNotFoundException,bsh.EvalError, java.rmi.RemoteException;
  public java.lang.Object runScriptFromURL(String URL)throws java.io.FileNotFoundException,bsh.EvalError, java.rmi.RemoteException;
+ public String doExecuteScript(String script) throws Exception;
 }

@@ -1,31 +1,34 @@
 package com.idega.block.beanshell.business;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
-
-import bsh.EvalError;
-import bsh.Interpreter;
-import bsh.TargetError;
-import bsh.servlet.BshServlet;
+import java.util.logging.Level;
 
 import com.idega.business.IBOServiceBean;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.UnavailableIWContext;
 import com.idega.presentation.IWContext;
 import com.idega.util.FileUtil;
+import com.idega.util.StringUtil;
+
+import bsh.EvalError;
+import bsh.Interpreter;
+import bsh.TargetError;
+import bsh.servlet.BshServlet;
 
 /**
- * 
+ *
  * An adaptor for running Beanshell scripts (http://www.beanshell.org) within an idegaWeb application.
- * 
+ *
  * @author <a href="mailto:eiki@idega.is">Eirikur Hrafnsson</a>
  */
 public class BSHEngineBean extends IBOServiceBean implements BSHEngine{
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -3639337915216094258L;
 	private String bshVersion;
@@ -36,10 +39,11 @@ public class BSHEngineBean extends IBOServiceBean implements BSHEngine{
 
 	/**
 	 * A method that gets an Interpreter and runs the supplied bsh script.
-	 * 
+	 *
 	 * @param theScript a string containing a bsh script to run
 	 * @return the object result, might be null
 	 */
+	@Override
 	public Object runScript(String theScript) throws EvalError {
 		Object obj = null;
 
@@ -57,11 +61,12 @@ public class BSHEngineBean extends IBOServiceBean implements BSHEngine{
 
 	/**
 	 * A method that gets an Interpreter and runs the supplied bsh script WITH all request parameters initialized as String variables
-	 * 
+	 *
 	 * @param theScript a string containing a bsh script to run
 	 * @param iwc
 	 * @return the object result, might be null
 	 */
+	@Override
 	public Object runScript(String theScript, IWContext iwc) throws EvalError,TargetError {
 		Object obj = null;
 
@@ -73,94 +78,99 @@ public class BSHEngineBean extends IBOServiceBean implements BSHEngine{
 
 		return obj;
 	}
-	
+
 	/**
 	 * A method that gets an Interpreter and runs the supplied bsh script WITH all request parameters initialized as String variables
-	 * 
+	 *
 	 * @param bundle The bundle the script file is in
 	 * @param scriptFileName The name of the bsh script file to run
 	 * @param iwc
 	 * @return the object result, might be null
 	 */
+	@Override
 	public Object runScriptFromBundle(IWBundle bundle, String scriptFileName, IWContext iwc) throws FileNotFoundException, EvalError {
-		Object obj = null;		
+		Object obj = null;
 		obj = runScriptFromFileWithPath(bundle.getRealPathWithFileNameString(scriptFileName),iwc);
 		return obj;
 	}
-	
+
 	/**
 	 * A method that gets an Interpreter and runs the supplied bsh script
-	 * 
+	 *
 	 * @param bundle The bundle the script file is in
 	 * @param scriptFileName The name of the bsh script file to run
 	 * @param iwc
 	 * @return the object result, might be null
 	 */
+	@Override
 	public Object runScriptFromBundle(IWBundle bundle, String scriptFileName) throws FileNotFoundException, EvalError {
-		Object obj = null;		
+		Object obj = null;
 		obj = runScriptFromFileWithPath(bundle.getRealPathWithFileNameString(scriptFileName));
 		return obj;
 	}
-	
+
 	/**
 	 * A method that gets an Interpreter and runs the supplied bsh script
-	 * 
+	 *
 	 * @param scriptFileNameWithPath The name of the bsh script file to run with its path PREFIXED
 	 * @param iwc
 	 * @return the object result, might be null
 	 */
+	@Override
 	public Object runScriptFromFileWithPath(String scriptFileNameWithPath) throws FileNotFoundException, EvalError {
 		Object obj = null;
 
 		Interpreter engine = getBSHInterpreter();
 		//run the script
 		printBSHVersionNumber(engine);
-		
+
 		obj = engine.eval(new FileReader(scriptFileNameWithPath));
 
 		return obj;
 	}
-	
+
 	/**
 	 * A method that gets an Interpreter and runs the supplied bsh script WITH all request parameters initialized as String variables
-	 * 
+	 *
 	 * @param scriptFileNameWithPath The name of the bsh script file to run with its path PREFIXED
 	 * @param iwc
 	 * @return the object result, might be null
 	 */
+	@Override
 	public Object runScriptFromFileWithPath(String scriptFileNameWithPath, IWContext iwc) throws FileNotFoundException, EvalError {
 		Object obj = null;
 
 		Interpreter engine = getInterpreterWithRequestParametersAndContextSet(iwc);
 		//run the script
 		printBSHVersionNumber(engine);
-		
+
 		obj = engine.eval(new FileReader(scriptFileNameWithPath));
 
 		return obj;
 	}
-		
+
 	/**
 	 * A method that gets an Interpreter and runs the supplied bsh script WITH all request parameters initialized as String variables
-	 * 
+	 *
 	 * @param URI The bsh script file to run
 	 * @return the object result, might be null
 	 */
+	@Override
 	public Object runScriptFromURL(String URL) throws EvalError {
 		Object obj = null;
 		IWContext iwc = null;
 		Interpreter engine = null;
-		
+
 		try {
 			iwc = IWContext.getInstance();
 			engine = getInterpreterWithRequestParametersAndContextSet(iwc);
 		} catch (UnavailableIWContext e) {
 			engine = getBSHInterpreter();
 		}
-		
+
 		//run the script
 		printBSHVersionNumber(engine);
-		
+
 		obj = engine.eval(FileUtil.getStringFromURL(URL));
 
 		return obj;
@@ -192,20 +202,23 @@ public class BSHEngineBean extends IBOServiceBean implements BSHEngine{
 	}
 
 
+	@Override
 	public Interpreter getBSHInterpreter() {
 		Interpreter engine = new bsh.Interpreter();
 		return engine;
 	}
 
 
+	@Override
 	public String getBshVersion() {
-		if (bshVersion != null)
+		if (bshVersion != null) {
 			return bshVersion;
+		}
 
 		/*
 		 * We have included a getVersion() command to detect the version of bsh. If bsh is packaged in the WAR file it could access it directly as a
 		 * bsh command. But if bsh is in the app server's classpath it won't see it here, so we will source it directly.
-		 * 
+		 *
 		 * This command works around the lack of a coherent version number in the early versions.
 		 */
 		Interpreter bsh = new Interpreter();
@@ -228,13 +241,44 @@ public class BSHEngineBean extends IBOServiceBean implements BSHEngine{
 	 *  // Source from files or streams bsh.source("myscript.bsh"); // or bsh.eval("source(\"myscript.bsh\")");
 	 *  // Use set() and get() to pass objects in and out of variables bsh.set( "date", new Date() ); Date date = (Date)bsh.get( "date" ); // This
 	 * would also work: Date date = (Date)bsh.eval( "date" );
-	 * 
+	 *
 	 * bsh.eval("year = date.getYear()"); Integer year = (Integer)bsh.get("year"); // primitives use wrappers
 	 *  // With Java1.3+ scripts can implement arbitrary interfaces... // Script an awt event handler (or source it from a file, more likely)
 	 * bsh.eval( "actionPerformed( e ) { print( e ); }"); // Get a reference to the script object (implementing the interface) ActionListener
 	 * scriptedHandler = (ActionListener)bsh.eval("return (ActionListener)this"); // Use the scripted event handler normally... new
 	 * JButton.addActionListener( script );
-	 *  
+	 *
 	 */
 
+	@Override
+	public String doExecuteScript(String script) throws Exception {
+		if (StringUtil.isEmpty(script)) {
+			return null;
+		}
+
+		try {
+			ProcessBuilder processBuilder = new ProcessBuilder();
+			processBuilder.command(script);
+			Process process = processBuilder.start();
+			StringBuilder output = new StringBuilder();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+			String line;
+			String separator = System.lineSeparator();
+			while ((line = reader.readLine()) != null) {
+				output.append(line + separator);
+			}
+
+			int exitVal = process.waitFor();
+			if (exitVal == 0) {
+				getLogger().info("Success executing " + script + ":" + separator + output.toString());
+				return output.toString();
+			} else {
+				getLogger().warning("Failed to execute " + script + ":" + separator + output.toString());
+			}
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Error running script " + script, e);
+		}
+		return null;
+	}
 }
